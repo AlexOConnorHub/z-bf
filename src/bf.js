@@ -42,44 +42,18 @@ const $gt$gt = $Z.$gt$gt;
 const $lt$lt = $Z.$lt$lt;
 const handleErr = $Z.handleErr;
 
-const Callable = function (obj) {
-  const ret = function (...args) {
-    return obj["call"]["apply"](ret, args);
-  };
-  ret["__proto__"] = Object;
-  Object["keys"](obj)["forEach"](function (key) {
-    ret[key] = obj[key];
-  });
-  return ret;
-};
-const Ref = function (val) {
-  return {
-    ["type"]: function () {
-      return "Ref";
-    },
-    ["deref"]: function () {
-      return val;
-    },
-    ["set"]: function (newVal) {
-      val = newVal;
-    },
-    ["="]: function (other) {
-      return JS["==="](this, other);
+const gr = stone(require("@zlanguage/zstdlib/src/js/gr"));
+const run = stone(require("./parse.zlang"));
+const readline = stone(require("readline-sync"));
+const main = async function () {
+  while (true) {
+    const someLine = await gr["line"]("File to run: ")._from();
+    if (assertBool($eq(someLine, ""))) {
+      break;
     }
-  };
+    run(someLine);
+  }
 };
-const Immut = function (data) {
-  return {
-    ["type"]: function () {
-      return "Immut";
-    },
-    ["deref"]: function () {
-      return copy(data);
-    }
-  };
-};
-module.exports = stone({
-  ["Callable"]: Callable,
-  ["Ref"]: Ref,
-  ["Immut"]: Immut
-});
+let test = readline["question"]("prompt> ");
+log(test);
+main();
