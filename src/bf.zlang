@@ -165,7 +165,7 @@ def execute: go func () {
 }
 
 def main: go func () {
-    let path: "../test/simple.bf" # get gr.line("File to run: ")
+    let path: get gr.line("File to run: ")
     let buf: get gr.readfile(path)
     let index: 0
     let str: ""
