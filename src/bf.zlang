@@ -1,15 +1,190 @@
 #!/bin/env -S zcomp run
 importstd gr
-import run: "./parse.zlang"
 
-def main: go func () {
-    loop {
-        def someLine: get gr.line("File to run: ")
-        if someLine = "" {
-            break
-        }
-        run(someLine)
+let self: [
+    "input": [],
+    "inputIndex": 0,
+    "memory": [0],
+    "memoryIndex": 0,
+    "output": "",
+    "bracketCount": 0
+]
+
+def isNotNumber: func (char) {
+    return match char {
+        "0" => false,
+        "1" => false,
+        "2" => false,
+        "3" => false,
+        "4" => false,
+        "5" => false,
+        "6" => false,
+        "7" => false,
+        "8" => false,
+        "9" => false,
+        _ => true
     }
 }
 
+def isWhiteSpace: func (char) {
+    return match char {
+        " " => true,
+        "\n" => true,
+        "\t" => true,
+        _ => false
+    }
+}
+
+def customLog: func (message) {
+    console.clear()
+    log(message)
+}
+
+def parseNumber: func (inputLine, index) {
+    let char: inputLine[index]
+    if isNotNumber(inputLine[index + 1]) {
+        self.input: self.input ++ char
+        return index
+    }
+    let num: ""
+    loop {
+        if isNotNumber(inputLine[index + 1]) {
+            break
+        }
+        num: num ++ inputLine[index + 1]
+        index: index + 1
+    }
+    num: parseInt(num)
+    loop {
+        if num = 0 {
+            break
+        }
+        self.input: self.input ++ char
+        num: num - 1
+    }
+    return index
+}
+
+def addToInput: go func (inputLine) {
+    let index: 0
+    loop {
+        if index >= inputLine.length {
+            break
+        }
+        let opcode: inputLine[index]
+        if opcode = "<" {
+            index: parseNumber(inputLine, index)
+        } else if opcode = ">" {
+            index: parseNumber(inputLine, index)
+        } else if opcode = "+" {
+            index: parseNumber(inputLine, index)
+        } else if opcode = "-" {
+            index: parseNumber(inputLine, index)
+        } else if opcode = "." {
+            self.input: self.input ++ opcode
+        } else if opcode = "," {
+            self.input: self.input ++ opcode
+        } else if opcode = "[" {
+            self.input: self.input ++ opcode
+        } else if opcode = "]" {
+            self.input: self.input ++ opcode
+        } else if opcode = "#" {
+            loop {
+                index: index + 1
+                if index >= inputLine.length or inputLine[index] = "#" or inputLine[index] = "\n" {
+                    break
+                }
+            }
+        } else if isWhiteSpace(opcode) {
+        } else {
+            raise "Unexpected token at index " ++ self.inputIndex ++ ": " ++ opcode.charCodeAt(0)
+        }
+        index: index + 1
+    }
+}
+
+def execute: go func () {
+    loop {
+        if self.inputIndex >= self.input.length or self.inputIndex < 0 {
+            break
+        }
+        let opcode: self.input[self.inputIndex]
+        if opcode = "<" {
+            if self.memoryIndex > 0 {
+                self.memoryIndex: self.memoryIndex - 1            
+            } else {
+                raise "Cannot access memory cell  " ++ self.memoryIndex - 1
+            }
+        } else if opcode = ">" {
+            self.memoryIndex: self.memoryIndex + 1
+            if self.memoryIndex = self.memory.length {
+                self.memory: self.memory ++ 0
+            }
+        } else if opcode = "+" {
+            self.memory[self.memoryIndex]: self.memory[self.memoryIndex] + 1
+        } else if opcode = "-" {
+            self.memory[self.memoryIndex]: self.memory[self.memoryIndex] - 1
+        } else if opcode = "." {
+            self.output: self.output ++ String.fromCharCode(self.memory[self.memoryIndex])
+            customLog(self.output)
+        } else if opcode = "," {
+            def ln: get gr.line
+            self.memory[self.memoryIndex]: ln.charCodeAt(0)
+        } else if opcode = "[" {
+            if self.memory[self.memoryIndex] = 0 {
+                loop {
+                    self.inputIndex: self.inputIndex + 1
+                    if self.inputIndex >= self.input.length {
+                        break
+                    } else if self.input[self.inputIndex] = "]" and self.bracketCount = 0 {
+                        break
+                    } else if self.input[self.inputIndex] = "]" and self.bracketCount > 0 {
+                        self.bracketCount: self.bracketCount - 1
+                    } else if self.input[self.inputIndex] = "[" {
+                        self.bracketCount: self.bracketCount + 1
+                    }
+                }
+            }
+        } else if opcode = "]" {
+            loop {
+                self.inputIndex: self.inputIndex - 1
+                if self.inputIndex <= -1 {
+                    break
+                } else if self.input[self.inputIndex] = "[" and self.bracketCount = 0 {
+                    self.inputIndex: self.inputIndex - 1
+                    break
+                } else if self.input[self.inputIndex] = "[" and self.bracketCount > 0 {
+                    self.bracketCount: self.bracketCount - 1
+                } else if self.input[self.inputIndex] = "]" {
+                    self.bracketCount: self.bracketCount + 1
+                }
+            }
+        }
+        self.inputIndex: self.inputIndex + 1
+    }
+}
+
+def main: go func () {
+    let path: "../test/simple.bf" # get gr.line("File to run: ")
+    let buf: get gr.readfile(path)
+    let index: 0
+    let str: ""
+    loop {
+        if index >= buf.length {
+            break
+        }
+        str: str ++ String.fromCharCode(buf[index])
+        index: index + 1
+    }
+    addToInput(str)
+    execute()
+}
+
 main()
+
+export [
+    customLog,
+    addToInput,
+    execute,
+    parseNumber
+]

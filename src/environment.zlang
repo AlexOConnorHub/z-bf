@@ -1,7 +1,0 @@
-let self = [
-    "input": [0,1],
-    "inputIndex": 0,
-    "memory": [],
-    "memoryIndex": 0
-]
-module.export =  self
