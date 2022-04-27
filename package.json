@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@zlanguage/zstdlib": "^0.4.1"
+  }
+}

@@ -1,0 +1,15 @@
+#!/bin/env -S zcomp run
+importstd gr
+import run: "./parse.zlang"
+
+def main: go func () {
+    loop {
+        def someLine: get gr.line("File to run: ")
+        if someLine = "" {
+            break
+        }
+        run(someLine)
+    }
+}
+
+main()
