@@ -1,4 +1,4 @@
-+8 # This is a com#ment
++8 # This is a comment
 [ # If you don't coment out characters other than
     >++++ # []<>.,-+
     [     # You will get an error!

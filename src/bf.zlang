@@ -98,7 +98,7 @@ def addToInput: go func (inputLine) {
             }
         } else if isWhiteSpace(opcode) {
             if inputLine[index] = "\n" {
-                line: line + 1
+                self.line: self.line + 1
             }
         } else {
             raise "[Error on line " ++ self.line ++ "] Unexpected token after " ++ inputLine[index - 1] ++ ": " ++ opcode
