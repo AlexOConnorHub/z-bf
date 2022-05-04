@@ -2,6 +2,7 @@
 importstd gr
 
 let self: [
+    "line": 1,
     "input": [],
     "inputIndex": 0,
     "memory": [0],
@@ -96,8 +97,11 @@ def addToInput: go func (inputLine) {
                 }
             }
         } else if isWhiteSpace(opcode) {
+            if inputLine[index] = "\n" {
+                line: line + 1
+            }
         } else {
-            raise "Unexpected token at index " ++ self.inputIndex ++ ": " ++ opcode.charCodeAt(0)
+            raise "[Error on line " ++ self.line ++ "] Unexpected token after " ++ inputLine[index - 1] ++ ": " ++ opcode
         }
         index: index + 1
     }
